@@ -43,7 +43,7 @@ MDAnalysis.core.flags['use_KDTree_routines'] = False
 
 #create parser
 #=============
-version_nb="1.0.0"
+version_nb="0.1.0"
 parser = argparse.ArgumentParser(prog='order_param', usage='', add_help=False, formatter_class=argparse.RawDescriptionHelpFormatter, description=\
 '''
 **********************************************
