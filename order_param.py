@@ -842,51 +842,58 @@ def rolling_avg(loc_list):
 	return numpy.average(numpy.lib.stride_tricks.as_strided(loc_arr, shape=shape, strides=strides), -1)
 def calculate_stats():
 	
-	#case: gro file
-	#==============
-	if args.xtcfilename=="no":
-		for l in ["lower","upper"]:
-			op_tailA_avg[l]["all"]=[]
-			op_tailA_std[l]["all"]=[]
-			op_tailB_avg[l]["all"]=[]
-			op_tailB_std[l]["all"]=[]
-			op_both_avg[l]["all"]=[]
-			op_both_std[l]["all"]=[]
-			#store specie info
+	for l in ["lower","upper"]:
+		#define data structure
+		#---------------------
+		op_tailA_avg[l]["all"]=[]
+		op_tailA_std[l]["all"]=[]
+		op_tailB_avg[l]["all"]=[]
+		op_tailB_std[l]["all"]=[]
+		op_both_avg[l]["all"]=[]
+		op_both_std[l]["all"]=[]
+	
+		#store specie average
+		#--------------------
+		#case: gro file
+		if args.xtcfilename=="no":
 			for s in lipids_handled[l]:
 				op_tailA_avg[l][s]=op_tailA_avg_frame[l][s][1]
-				op_tailA_avg[l]["all"].append(op_tailA_avg_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
+				op_tailA_avg[l]["all"].append(op_tailA_avg_frame[l][s][1]*lipids_nff_sele[l][s].numberOfResidues())
 				op_tailB_avg[l][s]=op_tailB_avg_frame[l][s][1]
-				op_tailB_avg[l]["all"].append(op_tailB_avg_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
+				op_tailB_avg[l]["all"].append(op_tailB_avg_frame[l][s][1]*lipids_nff_sele[l][s].numberOfResidues())
 				op_both_avg[l][s]=op_both_avg_frame[l][s][1]
-				op_both_avg[l]["all"].append(op_both_avg_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
+				op_both_avg[l]["all"].append(op_both_avg_frame[l][s][1]*lipids_nff_sele[l][s].numberOfResidues())
 				op_tailA_std[l][s]=op_tailA_std_frame[l][s][1]
-				op_tailA_std[l]["all"].append(op_tailA_std_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
+				op_tailA_std[l]["all"].append(op_tailA_std_frame[l][s][1]*lipids_nff_sele[l][s].numberOfResidues())
 				op_tailB_std[l][s]=op_tailB_std_frame[l][s][1]
-				op_tailB_std[l]["all"].append(op_tailB_std_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
+				op_tailB_std[l]["all"].append(op_tailB_std_frame[l][s][1]*lipids_nff_sele[l][s].numberOfResidues())
 				op_both_std[l][s]=op_both_std_frame[l][s][1]
-				op_both_std[l]["all"].append(op_both_std_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
-	
-			#calculate leaflet average
-			op_tailA_avg[l]["all"]=numpy.sum(op_tailA_avg[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
-			op_tailB_avg[l]["all"]=numpy.sum(op_tailB_avg[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])	
-			op_both_avg[l]["all"]=numpy.sum(op_both_avg[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
-			op_tailA_std[l]["all"]=numpy.sum(op_tailA_std[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
-			op_tailB_std[l]["all"]=numpy.sum(op_tailB_std[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])	
-			op_both_std[l]["all"]=numpy.sum(op_both_std[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
-	
-	#case: xtc file
-	#==============
-	else:
-		for l in ["lower","upper"]:
+				op_both_std[l]["all"].append(op_both_std_frame[l][s][1]*lipids_nff_sele[l][s].numberOfResidues())
+		#case: xtc file
+		else:
 			for s in lipids_handled[l]:
 				op_tailA_avg[l][s]=numpy.average(op_tailA_avg_frame[l][s].values())
+				op_tailA_avg[l]["all"].append(numpy.average(op_tailA_avg_frame[l][s].values())*lipids_nff_sele[l][s].numberOfResidues())
 				op_tailB_avg[l][s]=numpy.average(op_tailB_avg_frame[l][s].values())
-				op_both_avg[l][s]=numpy.average(op_both_avg_frame[l][s].values())				
+				op_tailB_avg[l]["all"].append(numpy.average(op_tailB_avg_frame[l][s].values())*lipids_nff_sele[l][s].numberOfResidues())
+				op_both_avg[l][s]=numpy.average(op_both_avg_frame[l][s].values())
+				op_both_avg[l]["all"].append(numpy.average(op_both_avg_frame[l][s].values())*lipids_nff_sele[l][s].numberOfResidues())
 				op_tailA_std[l][s]=numpy.average(op_tailA_std_frame[l][s].values())
+				op_tailA_std[l]["all"].append(numpy.average(op_tailA_std_frame[l][s].values())*lipids_nff_sele[l][s].numberOfResidues())
 				op_tailB_std[l][s]=numpy.average(op_tailB_std_frame[l][s].values())
+				op_tailB_std[l]["all"].append(numpy.average(op_tailB_std_frame[l][s].values())*lipids_nff_sele[l][s].numberOfResidues())
 				op_both_std[l][s]=numpy.average(op_both_std_frame[l][s].values())
+				op_both_std[l]["all"].append(numpy.average(op_both_std_frame[l][s].values())*lipids_nff_sele[l][s].numberOfResidues())
 	
+		#calculate leaflet average
+		#-------------------------
+		op_tailA_avg[l]["all"]=numpy.sum(op_tailA_avg[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
+		op_tailB_avg[l]["all"]=numpy.sum(op_tailB_avg[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])	
+		op_both_avg[l]["all"]=numpy.sum(op_both_avg[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
+		op_tailA_std[l]["all"]=numpy.sum(op_tailA_std[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
+		op_tailB_std[l]["all"]=numpy.sum(op_tailB_std[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])	
+		op_both_std[l]["all"]=numpy.sum(op_both_std[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
+		
 	return
 def smooth_data():
 	
