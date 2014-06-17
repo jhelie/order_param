@@ -43,7 +43,7 @@ MDAnalysis.core.flags['use_KDTree_routines'] = False
 
 #create parser
 #=============
-version_nb="0.1.0"
+version_nb="0.1.1"
 parser = argparse.ArgumentParser(prog='order_param', usage='', add_help=False, formatter_class=argparse.RawDescriptionHelpFormatter, description=\
 '''
 **********************************************
@@ -846,13 +846,34 @@ def calculate_stats():
 	#==============
 	if args.xtcfilename=="no":
 		for l in ["lower","upper"]:
+			op_tailA_avg[l]["all"]=[]
+			op_tailA_std[l]["all"]=[]
+			op_tailB_avg[l]["all"]=[]
+			op_tailB_std[l]["all"]=[]
+			op_both_avg[l]["all"]=[]
+			op_both_std[l]["all"]=[]
+			#store specie info
 			for s in lipids_handled[l]:
 				op_tailA_avg[l][s]=op_tailA_avg_frame[l][s][1]
+				op_tailA_avg[l]["all"].append(op_tailA_avg_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
 				op_tailB_avg[l][s]=op_tailB_avg_frame[l][s][1]
+				op_tailB_avg[l]["all"].append(op_tailB_avg_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
 				op_both_avg[l][s]=op_both_avg_frame[l][s][1]
+				op_both_avg[l]["all"].append(op_both_avg_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
 				op_tailA_std[l][s]=op_tailA_std_frame[l][s][1]
+				op_tailA_std[l]["all"].append(op_tailA_std_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
 				op_tailB_std[l][s]=op_tailB_std_frame[l][s][1]
+				op_tailB_std[l]["all"].append(op_tailB_std_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
 				op_both_std[l][s]=op_both_std_frame[l][s][1]
+				op_both_std[l]["all"].append(op_both_std_frame[l][s][1]*lipids_nff_sele["upper"][s].numberOfResidues())
+	
+			#calculate leaflet average
+			op_tailA_avg[l]["all"]=numpy.sum(op_tailA_avg[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
+			op_tailB_avg[l]["all"]=numpy.sum(op_tailB_avg[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])	
+			op_both_avg[l]["all"]=numpy.sum(op_both_avg[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
+			op_tailA_std[l]["all"]=numpy.sum(op_tailA_std[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
+			op_tailB_std[l]["all"]=numpy.sum(op_tailB_std[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])	
+			op_both_std[l]["all"]=numpy.sum(op_both_std[l]["all"])/float(lipids_nff_sele_nb["upper"]["all"])
 	
 	#case: xtc file
 	#==============
@@ -1702,6 +1723,10 @@ def write_frame_stat(f_nb, f_index, t):
 		output_stat.write(" P2=0    : random\n")
 		output_stat.write(" P2=-0.5 : orthogonal\n")
 	
+		#average
+		output_stat.write("\n")
+		output_stat.write("average order parameter: " + str(round((op_both_avg["upper"]["all"]*lipids_nff_sele_nb["upper"]["all"]+op_both_avg["lower"]["all"]*lipids_nff_sele_nb["lower"]["all"])/float(lipids_nff_sele_nb["upper"]["all"]+lipids_nff_sele_nb["lower"]["all"]),2)) + "\n")
+	
 		#lipids in upper leaflet
 		output_stat.write("\n")
 		output_stat.write("upper leaflet\n")
@@ -1710,11 +1735,15 @@ def write_frame_stat(f_nb, f_index, t):
 		output_stat.write("-------------------------------------\n")
 		for s in lipids_handled["upper"]:
 			output_stat.write(str(s) + "	" + str(lipids_nff_sele["upper"][s].numberOfResidues()) + "	" + str(round(op_tailA_avg["upper"][s],2)) + "	" + str(round(op_tailB_avg["upper"][s],2)) + "	 " + str(round(op_both_avg["upper"][s],2)) + "\n")
+		output_stat.write("-------------------------------------\n")
+		output_stat.write("all	" + str(lipids_nff_sele_nb["upper"]["all"]) + "	" + str(round(op_tailA_avg["upper"]["all"],2)) + "	" + str(round(op_tailB_avg["upper"]["all"],2)) + "	 " + str(round(op_both_avg["upper"]["all"],2)) + "\n")		
 		output_stat.write("\n")
 		output_stat.write("std	nb	tail A	tail B	 both\n")
 		output_stat.write("-------------------------------------\n")
 		for s in lipids_handled["upper"]:
 			output_stat.write(str(s) + "	" + str(lipids_nff_sele["upper"][s].numberOfResidues()) + "	" + str(round(op_tailA_std["upper"][s],2)) + "	" + str(round(op_tailB_std["upper"][s],2)) + "	 " + str(round(op_both_std["upper"][s],2)) + "\n")
+		output_stat.write("-------------------------------------\n")
+		output_stat.write("all	" + str(lipids_nff_sele_nb["upper"]["all"]) + "	" + str(round(op_tailA_std["upper"]["all"],2)) + "	" + str(round(op_tailB_std["upper"]["all"],2)) + "	 " + str(round(op_both_std["upper"]["all"],2)) + "\n")		
 	
 		#lipids in lower leaflet
 		output_stat.write("\n")
@@ -1724,11 +1753,16 @@ def write_frame_stat(f_nb, f_index, t):
 		output_stat.write("-------------------------------------\n")
 		for s in lipids_handled["lower"]:
 			output_stat.write(str(s) + "	" + str(lipids_nff_sele["lower"][s].numberOfResidues()) + "	" + str(round(op_tailA_avg["lower"][s],2)) + "	" + str(round(op_tailB_avg["lower"][s],2)) + "	 " + str(round(op_both_avg["lower"][s],2)) + "\n")
+		output_stat.write("-------------------------------------\n")
+		output_stat.write("all	" + str(lipids_nff_sele_nb["lower"]["all"]) + "	" + str(round(op_tailA_avg["lower"]["all"],2)) + "	" + str(round(op_tailB_avg["lower"]["all"],2)) + "	 " + str(round(op_both_avg["lower"]["all"],2)) + "\n")		
 		output_stat.write("\n")
 		output_stat.write("std	nb	tail A	tail B	 both\n")
 		output_stat.write("-------------------------------------\n")
 		for s in lipids_handled["lower"]:
 			output_stat.write(str(s) + "	" + str(lipids_nff_sele["lower"][s].numberOfResidues()) + "	" + str(round(op_tailA_std["lower"][s],2)) + "	" + str(round(op_tailB_std["lower"][s],2)) + "	 " + str(round(op_both_std["lower"][s],2)) + "\n")
+		output_stat.write("-------------------------------------\n")
+		output_stat.write("all	" + str(lipids_nff_sele_nb["lower"]["all"]) + "	" + str(round(op_tailA_std["lower"]["all"],2)) + "	" + str(round(op_tailB_std["lower"]["all"],2)) + "	 " + str(round(op_both_std["lower"]["all"],2)) + "\n")		
+
 		output_stat.close()
 	
 		#ff lipids
